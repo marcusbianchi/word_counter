@@ -1,0 +1,42 @@
+version: '3'
+services:
+  document-import:
+    build:
+        dockerfile: ./Dockerfile
+        context: ./document_import/
+    image: marcusbianchi/document-import
+    container_name: document-import        
+    networks: 
+      - production-network
+    volumes:
+      - ./words:/var/docs   
+    depends_on:
+      - "redis-container"
+  count-server:
+    build:
+        dockerfile: ./Dockerfile
+        context: ./count_server/
+    image: marcusbianchi/count_server
+    container_name: count_server        
+    networks: 
+      - production-network 
+    depends_on:
+      - "redis-container"  
+    ports:
+      - "5000:5000"   
+
+  redis-container:
+      image: redis
+      container_name: redis-container
+      networks: 
+        - production-network
+      ports:
+        - "6379:6379"
+      volumes:
+        - ./data/redis:/data
+  
+
+networks: 
+  production-network:
+      driver: bridge
+
